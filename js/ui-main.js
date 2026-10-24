@@ -1,17 +1,15 @@
-/**
- * ui-main.js
- * Coordinates the main screen.
- */
 import { Picker } from './ui-picker.js';
 import { sheet } from './ui-sheet.js';
 import { ChimesUI } from './ui-chimes.js';
 import { audioController } from './audio.js';
 import { Storage } from './storage.js';
+import { RunningUI } from './ui-running.js';
 
 export class MainUI {
   constructor() {
     this.picker = null;
     this.chimesUI = null;
+    this.runningUI = null;
     this.state = {
       totalMs: 0,
       label: 'None',
@@ -27,6 +25,9 @@ export class MainUI {
     // Load persisted state
     const saved = Storage.load('draft_timer');
     if (saved) this.state = { ...this.state, ...saved };
+
+    // Init Running UI
+    this.runningUI = new RunningUI(this);
 
     // Init Duration Picker (3 wheels)
     this.setupDurationPicker();
@@ -119,8 +120,20 @@ export class MainUI {
 
   handleStart() {
     if (this.state.totalMs <= 0) return;
-    // Transition to running screen (handled in Phase 4)
-    console.log('Start clicked - total:', this.state.totalMs);
+
+    // Import the actual engine state
+    import('./timer-engine.js').then(({ createTimerState }) => {
+      const state = createTimerState(this.state.totalMs, this.state.label, this.state.chimes);
+      state.endSound = this.state.endSound;
+      state.endRingSeconds = this.state.endRingSeconds;
+
+      // Start in RunningUI
+      this.runningUI.start({
+        ...state,
+        status: 'running',
+        lastResumeAt: Date.now()
+      });
+    });
   }
 
   handleCancel() {
