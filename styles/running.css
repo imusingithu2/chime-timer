@@ -1,0 +1,45 @@
+/* running.css */
+.running-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  display: none;
+}
+
+.progress-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.timer-display {
+  font-size: 80px;
+  font-weight: 200;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-color);
+}
+
+.end-time-line {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  color: var(--secondary-text);
+  font-size: 17px;
+}
+
+.bell-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  fill: currentColor;
+}

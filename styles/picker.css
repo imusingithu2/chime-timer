@@ -1,0 +1,73 @@
+/* picker.css */
+.picker-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 220px;
+  position: relative;
+  background-color: var(--card-bg);
+  margin-bottom: 20px;
+  border-radius: 12px;
+}
+
+.picker-wheel {
+  display: flex;
+  height: 220px;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.picker-wheel::-webkit-scrollbar {
+  display: none;
+}
+
+.picker-item {
+  height: 44px;
+  min-height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  scroll-snap-align: center;
+  color: var(--text-color);
+}
+
+.picker-band {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 44px;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+.picker-unit {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 17px;
+  color: var(--secondary-text);
+  pointer-events: none;
+}
+
+.picker-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--card-bg) 0%,
+    transparent 25%,
+    transparent 75%,
+    var(--card-bg) 100%
+  );
+}

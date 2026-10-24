@@ -1,0 +1,109 @@
+/* base.css */
+:root {
+  --bg-color: #000000;
+  --card-bg: #1C1C1E;
+  --separator-color: #38383A;
+  --text-color: #FFFFFF;
+  --secondary-text: #8E8E93;
+  --cancel-fill: #333333;
+  --start-green: #30D158;
+  --start-green-bg: rgba(48, 209, 88, 0.22);
+  --pause-orange: #FF9F0A;
+  --pause-orange-bg: rgba(255, 159, 10, 0.22);
+  --destructive-red: #FF453A;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg-color: #F2F2F7;
+    --card-bg: #FFFFFF;
+    --separator-color: #C6C6C8;
+    --text-color: #000000;
+    --secondary-text: #8E8E93;
+    --cancel-fill: #E5E5EA;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  font-family: -apple-system, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  height: 100dvh;
+  width: 100vw;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Grouped List Styles */
+.list-group {
+  margin: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.group-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.group-header {
+  font-size: 13px;
+  text-transform: uppercase;
+  color: var(--secondary-text);
+  margin: 0 0 8px 16px;
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  font-size: 17px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.row-label {
+  flex: 1;
+}
+
+.row-value {
+  color: var(--secondary-text);
+}
+
+.chevron {
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--secondary-text);
+  border-bottom: 2px solid var(--secondary-text);
+  transform: rotate(-45deg);
+  margin-left: 8px;
+}

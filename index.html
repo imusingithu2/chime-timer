@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Chime Timer">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#000000">
+  <title>Chime Timer</title>
+  <link rel="stylesheet" href="./styles/base.css">
+  <link rel="stylesheet" href="./styles/picker.css">
+  <link rel="stylesheet" href="./styles/components.css">
+  <link rel="stylesheet" href="./styles/running.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Main Screen -->
+    <div id="main-screen" class="screen">
+      <div class="list-group">
+        <div class="group-section">
+          <div class="picker-container">
+            <div class="picker-mask"></div>
+            <div id="duration-picker" class="picker-wheel"></div>
+            <div class="picker-band"></div>
+            <div id="picker-units" class="picker-unit"></div>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="btn-cancel" class="circle-btn cancel">Cancel</button>
+          <button id="btn-start" class="circle-btn start">Start</button>
+        </div>
+
+        <div class="group-section">
+          <div class="card">
+            <div id="row-label" class="row">
+              <span class="row-label">Label</span>
+              <span class="row-value">None</span>
+              <span class="chevron"></span>
+            </div>
+            <div id="row-end-settings" class="row">
+              <span class="row-label">When Timer Ends</span>
+              <span class="row-value">Bell, 3s</span>
+              <span class="chevron"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="group-section">
+          <div class="group-header">Chimes</div>
+          <div id="chimes-list" class="card">
+            <!-- Chime rows here -->
+          </div>
+          <div id="btn-add-chime" class="row" style="color: var(--start-green); margin-top: 8px;">
+            <span>+ Add Chime</span>
+          </div>
+        </div>
+
+        <div class="group-section">
+          <div class="group-header">Recents</div>
+          <div id="recents-list" class="card">
+            <!-- Recents rows here -->
+          </div>
+        </div>
+
+        <div class="group-section">
+          <div id="row-settings" class="row card">
+            <span class="row-label">Settings</span>
+            <span class="chevron"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Running Screen -->
+    <div id="running-screen" class="running-screen">
+      <div class="progress-container">
+        <svg width="300" height="300">
+          <circle cx="150" cy="150" r="140" stroke="var(--separator-color)" stroke-width="8" fill="none" />
+          <circle id="progress-ring" cx="150" cy="150" r="140" stroke="var(--pause-orange)" stroke-width="8" fill="none"
+                  stroke-dasharray="879.6" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 150 150)" />
+        </svg>
+        <div id="timer-display" class="timer-display">00:00:00</div>
+      </div>
+      <div class="end-time-line">
+        <svg class="bell-icon" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        <span id="end-time-text">3:42 PM</span>
+      </div>
+      <div class="button-row">
+        <button id="run-btn-cancel" class="circle-btn cancel">Cancel</button>
+        <button id="run-btn-pause" class="circle-btn pause">Pause</button>
+      </div>
+      <div id="next-chime-text" style="color: var(--secondary-text); margin-top: 20px;">No more chimes</div>
+    </div>
+
+    <!-- Sheet -->
+    <div id="sheet-backdrop" class="sheet-backdrop"></div>
+    <div id="sheet" class="sheet">
+      <div class="sheet-grabber"></div>
+      <div class="sheet-header">
+        <button id="sheet-btn-cancel" class="sheet-btn">Cancel</button>
+        <div id="sheet-title" class="sheet-header-title">Title</div>
+        <button id="sheet-btn-done" class="sheet-btn">Done</button>
+      </div>
+      <div id="sheet-content" class="sheet-content"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>
