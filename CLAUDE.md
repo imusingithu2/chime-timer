@@ -8,3 +8,4 @@
 - Keep every source file under ~300 lines; make small targeted edits.
 - Verify by running code. If a command fails, read the error, fix, retry.
 - Do not run git push or any gh command. I deploy by myself.
+- This machine has no Python. Use Node.js (tools/*.cjs, built-in modules only, no npm packages) for every tool script, including generating the PNG icons in Phase 5 (write a small PNG encoder using the built-in zlib module). Treat every mention of generate_sounds.py or generate_icons.py in SPEC.md as the .cjs equivalent.

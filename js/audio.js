@@ -7,7 +7,6 @@ export class AudioController {
   constructor() {
     this.sounds = {};
     this.isUnlocked = false;
-    this.activeRings = new Map(); // soundName -> Audio element
     this.bannerCallback = null;
   }
 
@@ -54,16 +53,12 @@ export class AudioController {
       return;
     }
 
-    // If already ringing this sound, don't start another one
-    if (this.activeRings.has(soundName)) return;
+    // Stop any other ring currently playing to avoid overlap
+    this.stopAll();
 
-    const element = audio.cloneNode(); // Use clone to allow multiple overlapping rings if needed,
-                                      // although SPEC says one ring at a time for chimes.
-    element.loop = true;
+    audio.loop = true;
 
-    this.activeRings.set(soundName, element);
-
-    element.play().catch(err => {
+    audio.play().catch(err => {
       console.error('Playback failed:', err);
       if (this.bannerCallback) {
         this.bannerCallback('Sound blocked - tap anywhere to enable');
@@ -76,16 +71,18 @@ export class AudioController {
   }
 
   stopRing(soundName) {
-    const element = this.activeRings.get(soundName);
-    if (element) {
-      element.pause();
-      element.currentTime = 0;
-      this.activeRings.delete(soundName);
+    const audio = this.sounds[soundName];
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
     }
   }
 
   stopAll() {
-    this.activeRings.forEach((_, name) => this.stopRing(name));
+    Object.values(this.sounds).forEach(audio => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
   }
 
   setBannerCallback(cb) {
