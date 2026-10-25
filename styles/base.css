@@ -48,8 +48,11 @@ body {
   flex-direction: column;
   height: 100%;
   width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
+  position: relative;
 }
 
 /* Grouped List Styles */

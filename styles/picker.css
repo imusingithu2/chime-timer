@@ -8,10 +8,12 @@
   background-color: var(--card-bg);
   margin-bottom: 20px;
   border-radius: 12px;
+  overflow: hidden;
 }
 
 .picker-wheel {
   display: flex;
+  flex-direction: column;
   height: 220px;
   overflow-y: scroll;
   scroll-snap-type: y mandatory;
