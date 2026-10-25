@@ -1,0 +1,20 @@
+#app { position: relative; max-width: 430px; margin: 0 auto; }
+.screen { height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 40px; }
+.button-row { display: flex; justify-content: space-between; padding: 8px 28px; margin: 0 16px; }
+.circle-btn { width: 84px; height: 84px; border-radius: 50%; border: none; font-size: 17px; font-weight: 500; cursor: pointer; color: var(--text-color); background: var(--cancel-fill); --ring: var(--cancel-fill); box-shadow: 0 0 0 2px var(--bg-color), 0 0 0 4px var(--ring); }
+.circle-btn.cancel { background: var(--cancel-fill); --ring: var(--cancel-fill); }
+.circle-btn.start, .circle-btn.resume { background: var(--start-green-bg); color: var(--start-green); --ring: var(--start-green); }
+.circle-btn.pause { background: var(--pause-orange-bg); color: var(--pause-orange); --ring: var(--pause-orange); }
+.circle-btn.stop { background: rgba(255,69,58,0.22); color: var(--destructive-red); --ring: var(--destructive-red); }
+.circle-btn.disabled { opacity: 0.4; pointer-events: none; }
+.sheet-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; max-width: 430px; margin: 0 auto; background: var(--bg-color); border-radius: 16px 16px 0 0; transform: translateY(100%); transition: transform 0.3s ease-out; z-index: 50; max-height: 85dvh; display: flex; flex-direction: column; padding-bottom: env(safe-area-inset-bottom); }
+.sheet.open { transform: translateY(0); }
+.sheet-grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--separator-color); margin: 8px auto 0; }
+.sheet-header { display: flex; align-items: center; justify-content: space-between; padding: 4px 12px 8px; }
+.sheet-header-title { font-weight: 600; font-size: 17px; }
+.sheet-btn { background: none; border: none; color: var(--pause-orange); font-size: 17px; min-height: 44px; padding: 0 10px; cursor: pointer; }
+.sheet-content { overflow-y: auto; }
+.running-screen { background: var(--bg-color); }
+#error-banner { display: none; position: fixed; top: env(safe-area-inset-top); left: 0; right: 0; z-index: 200; background: #FF453A; color: #fff; padding: 10px 14px; font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { .sheet { transition: none; } }
