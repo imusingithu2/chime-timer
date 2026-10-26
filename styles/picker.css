@@ -1,75 +1,40 @@
-/* picker.css */
-.picker-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 220px;
+/* picker.css - three vertical scroll-snap wheels (hours / min / sec), like Apple's Timer */
+.wheels {
   position: relative;
-  background-color: var(--card-bg);
-  margin-bottom: 20px;
-  border-radius: 12px;
-  overflow: hidden;
+  height: 220px;                 /* 5 rows x 44 px */
+  margin: 4px 0 8px;
 }
+.wheel-band {                    /* the highlighted centre row */
+  position: absolute; left: 0; right: 0; top: 88px; height: 44px;
+  background: var(--band); border-radius: 10px; pointer-events: none;
+}
+.wheel-cols {
+  position: relative; height: 100%;
+  display: flex; justify-content: center; gap: 4px;
+}
+.wheel-col { position: relative; width: 108px; flex: none; }
 
-.picker-wheel {
-  display: flex;
-  flex-direction: column;
-  height: 220px;
-  overflow-y: scroll;
+.wheel {
+  width: 58px; height: 220px;
+  overflow-y: auto;
   scroll-snap-type: y mandatory;
   scrollbar-width: none;
-  -ms-overflow-style: none;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 30%, #000 70%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 30%, #000 70%, transparent 100%);
 }
-
-.picker-wheel::-webkit-scrollbar {
-  display: none;
+.wheel::-webkit-scrollbar { display: none; }
+.wheel-spacer { height: 88px; flex: none; }
+.wheel-item {
+  height: 44px; line-height: 44px; flex: none;
+  padding-right: 8px; text-align: right;
+  font-size: 24px; font-variant-numeric: tabular-nums;
+  scroll-snap-align: center; scroll-snap-stop: always;
+  cursor: pointer;
 }
-
-.picker-item {
-  height: 44px;
-  min-height: 44px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 22px;
-  scroll-snap-align: center;
-  color: var(--text-color);
-}
-
-.picker-band {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 44px;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-  pointer-events: none;
-}
-
-.picker-unit {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 17px;
-  color: var(--secondary-text);
-  pointer-events: none;
-}
-
-.picker-mask {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    var(--card-bg) 0%,
-    transparent 25%,
-    transparent 75%,
-    var(--card-bg) 100%
-  );
+.wheel-unit {
+  position: absolute; left: 62px; top: 88px; height: 44px; line-height: 44px;
+  font-size: 16px; font-weight: 600; pointer-events: none;
 }

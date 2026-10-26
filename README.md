@@ -1,33 +1,29 @@
 # Chime Timer
 
-A zero-dependency Progressive Web App for iPhone that provides a countdown timer with custom "Chime" rings at arbitrary checkpoints.
+A countdown timer that looks like the iPhone Clock timer, plus **Chimes**: extra rings at any moment inside the total time.
+Example: total 2:00, chime at 1:00 rings 3 s, the end at 2:00 rings 3 s again.
 
-## Features
-- **Apple-style UI**: Familiar wheel pickers and grouped lists.
-- **Custom Chimes**: Add as many rings as you want at specific elapsed or remaining times.
-- **PWA Ready**: Install via Safari -> Share -> Add to Home Screen.
-- **Offline Support**: Works fully offline after the first load.
-- **Wake Lock**: Keeps the screen on while the timer is running to ensure chimes ring on time.
+Free PWA: static files only, hosted on GitHub Pages, installed with Safari > Share > Add to Home Screen.
 
-## Installation on iPhone
-1. Open the app URL in Safari.
-2. Tap the **Share** button (square with up arrow).
-3. Scroll down and tap **Add to Home Screen**.
-4. Ensure "Open as Web App" is ON.
+## Known limitations (iOS)
+- iOS cannot run web apps in the background. Chimes ring only while the app is open and the screen is on.
+  The app asks iOS to keep the screen awake; also set Settings > Display & Brightness > Auto-Lock to Never while timing.
+- If the app was frozen past a chime by more than 2 s, that chime is shown as "Missed" and does not ring late.
+- The silent switch / volume follow iOS media rules. Use Settings > Quick demo to test sound on your phone.
 
-## Deploy Steps (for the developer)
-This app is designed for GitHub Pages.
-1. Push the code to the `main` branch of a public GitHub repository.
-2. Go to **Settings** -> **Pages**.
-3. Under **Build and deployment**, set Source to "Deploy from a branch" and select `main` / `/ (root)`.
+## Test on your computer
+    node --test            # unit + static tests (no dependencies; do NOT add a folder argument)
+    node tools/serve.cjs   # then open http://127.0.0.1:8080/chime-timer/
 
-## Known Limitations
-- **Foreground Only**: iOS suspends web apps in the background. The app must be open and the screen on for chimes to ring.
-- **Screen Lock**: The app uses the Wake Lock API to prevent sleep, but this may be overridden by "Low Power Mode" or system settings.
-- **Silent Switch**: On some iOS versions, the physical silent switch may mute audio.
-- **iOS 26 Audio**: In some cases, audio may become silent after relaunching a Home Screen app; use the "Reset audio" button in Settings.
-- **LAN/HTTP**: Service Workers and Wake Lock require HTTPS. They will not work over plain http://LAN-IP.
+## Deploy (GitHub Pages: branch main, folder / root)
+1. Bump `APP_VERSION` in `js/version.js` (every deploy! otherwise phones keep the old cached app).
+2. `git add -A`, `git commit -m "Update"`, `git push`
+3. Wait about 1-10 minutes. The installed app shows "Updated - tap to reload" next time it opens.
 
-## Troubleshooting
-- **No sound?** Try the "Reset audio" button in Settings, or tap anywhere on the screen to unlock audio.
-- **Stale version?** Fully close the app from the App Switcher and reopen it. A banner will appear if an update is available.
+## Update problems / cache reset
+- iPhone: delete the Home Screen icon, Settings > Apps > Safari > Advanced > Website Data > remove imusingithu2.github.io, then add it again.
+- Desktop Chrome: DevTools > Application > Service Workers > Unregister, then Storage > Clear site data.
+
+## Files
+`index.html`, `manifest.webmanifest`, `sw.js` (offline cache), `js/` (engine + UI, classic scripts), `styles/`, `sounds/`, `icons/`
+(regenerate with `node tools/generate_sounds.cjs` / `node tools/generate_icons.cjs`), `tests/`.

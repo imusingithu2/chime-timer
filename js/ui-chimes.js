@@ -1,139 +1,124 @@
-/**
- * ui-chimes.js
- * Manages Chimes list and chime editing.
- */
-import { sheet } from './ui-sheet.js';
-import { Picker } from './ui-picker.js';
+/* ui-chimes.js - the "Chimes" list on the main screen and the add/edit sheet. */
+(function () {
+  'use strict';
+  var CT = (window.CT = window.CT || {});
+  var E = window.ChimeEngine, U = CT.ui, h = U.h, Sheet = U.Sheet;
 
-export class ChimesUI {
-  constructor(container, storage, audio) {
-    this.container = container;
-    this.storage = storage;
-    this.audio = audio;
-    this.state = { chimes: [] };
-    this.onUpdate = null;
+  function fmt(ms) { return E.formatDuration(ms); }
+
+  /* A grouped-list row with a label on the left and controls on the right. */
+  function formRow(label) {
+    var kids = Array.prototype.slice.call(arguments, 1);
+    return h('div', { class: 'row' }, h('span', { class: 'row-main', text: label }), kids);
   }
 
-  render(chimes) {
-    this.state.chimes = chimes;
-    this.container.innerHTML = '';
+  /* ---------------- list ---------------- */
+  function render(container, app) {
+    var d = app.draft;
+    container.innerHTML = '';
 
-    if (chimes.length === 0) {
-      this.container.innerHTML = '<div class="row" style="color: var(--secondary-text); justify-content: center;">No chimes added</div>';
-      return;
+    var items = d.chimes.map(function (c, i) {
+      return { c: c, i: i, valid: E.isValidChime(c, d.totalMs), at: E.chimeAt(c, d.totalMs) };
+    });
+    items.sort(function (a, b) {
+      if (a.valid !== b.valid) return a.valid ? -1 : 1;
+      return a.valid ? a.at - b.at : a.i - b.i;
+    });
+    var seen = {};
+    items.forEach(function (it) { if (it.valid) seen[it.at] = (seen[it.at] || 0) + 1; });
+
+    if (!items.length) {
+      container.appendChild(h('div', { class: 'row row-empty', text: 'No chimes. A chime rings at a time you choose inside the timer.' }));
     }
 
-    chimes.forEach(chime => {
-      const row = document.createElement('div');
-      row.className = 'row';
+    items.forEach(function (it) {
+      var c = it.c, dup = it.valid && seen[it.at] > 1;
+      var sub = it.valid
+        ? c.ringSeconds + ' s · ' + c.sound + (dup ? ' · same time as another chime, rings once' : '')
+        : 'Outside timer · will be skipped';
+      var text = h('span', { class: 'row-main' },
+        h('span', { class: 'row-title' + (it.valid ? '' : ' bad'), text: fmt(c.time) + (c.mode === 'beforeEnd' ? ' before end' : ' after start') }),
+        h('span', { class: 'row-sub' + (it.valid ? '' : ' bad'), text: sub }));
 
-      // Simple summary: "1:00 from start - 3s - Bell"
-      const timeStr = this.formatTime(chime.time);
-      const modeStr = chime.mode === 'fromStart' ? 'after start' : 'before end';
-      row.innerHTML = `
-        <span class="row-label">${timeStr} ${modeStr} - ${chime.ringSeconds}s - ${chime.sound}</span>
-        <span class="chevron"></span>
-      `;
-
-      row.onclick = () => this.editChime(chime);
-      this.container.appendChild(row);
-    });
-  }
-
-  formatTime(ms) {
-    const s = Math.floor(ms / 1000);
-    const h = Math.floor(s / 3600);
-    const m = Math.floor((s % 3600) / 60);
-    const sec = s % 60;
-    return `${h}:${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
-  }
-
-  editChime(chime) {
-    const content = `
-      <div class="list-group">
-        <div class="group-section">
-          <div class="group-header">Duration</div>
-          <div class="picker-container" id="chime-picker-container">
-            <div class="picker-mask"></div>
-            <div id="chime-picker-wheel" class="picker-wheel"></div>
-            <div class="picker-band"></div>
-            <div class="picker-unit">time</div>
-          </div>
-        </div>
-        <div class="group-section">
-          <div class="card">
-            <div class="row">
-              <span class="row-label">Mode</span>
-              <select id="chime-mode" style="background: none; color: var(--text-color); border: none; font-size: 17px;">
-                <option value="fromStart" ${chime.mode === 'fromStart' ? 'selected' : ''}>From start</option>
-                <option value="beforeEnd" ${chime.mode === 'beforeEnd' ? 'selected' : ''}>Before end</option>
-              </select>
-            </div>
-            <div class="row">
-              <span class="row-label">Ring for</span>
-              <input type="number" id="chime-ring-sec" value="${chime.ringSeconds}" min="1" max="60" style="width: 50px; background: none; color: var(--text-color); border: 1px solid var(--separator-color); text-align: center;">
-              <span class="row-value">s</span>
-            </div>
-            <div class="row">
-              <span class="row-label">Sound</span>
-              <select id="chime-sound" style="background: none; color: var(--text-color); border: none; font-size: 17px;">
-                ${['Bell', 'Chime', 'Marimba', 'Beacon', 'Pulse', 'Digital'].map(s =>
-                  `<option value="${s}" ${chime.sound === s ? 'selected' : ''}>${s}</option>`
-                ).join('')}
-              </select>
-              <button id="chime-preview" class="sheet-btn" style="margin-left: 10px;">Preview</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    sheet.open('Edit Chime', content, {
-      onDone: () => {
-        const timeMs = this.calculatePickerTime();
-        const updatedChime = {
-          ...chime,
-          time: timeMs,
-          mode: document.getElementById('chime-mode').value,
-          ringSeconds: parseInt(document.getElementById('chime-ring-sec').value),
-          sound: document.getElementById('chime-sound').value
-        };
-
-        // Update in list
-        const idx = this.state.chimes.findIndex(c => c.id === chime.id);
-        if (idx !== -1) this.state.chimes[idx] = updatedChime;
-
-        if (this.onUpdate) this.onUpdate(this.state.chimes);
+      if (app.editChimes) {
+        container.appendChild(h('div', { class: 'row' },
+          h('button', {
+            class: 'minus-btn', type: 'button', 'aria-label': 'Delete chime ' + fmt(c.time),
+            onclick: function () {
+              d.chimes = d.chimes.filter(function (x) { return x.id !== c.id; });
+              app.draftChanged();
+            }
+          }), text));
+      } else {
+        container.appendChild(h('button', { class: 'row', type: 'button', onclick: function () { openEditor(app, c); } },
+          text, h('span', { class: 'chevron' })));
       }
     });
 
-    // Init picker after sheet opens
-    setTimeout(() => {
-      const pickerWheel = document.getElementById('chime-picker-wheel');
-      if (pickerWheel) {
-        this.currentPicker = new Picker(pickerWheel, {
-          min: 0, max: 359999, // Max 99:59:59
-          initialValue: chime.time / 1000,
-          onChange: (v) => { /* just update internal state */ }
-        });
-        // Note: my Picker is simplified to 1 wheel. For a real h/m/s I need 3 wheels.
-        // But for now, I'll implement 1 wheel of seconds up to 3600 for simplicity
-        // or I should update the Picker class. I will update the Picker class in next turn
-        // or now if I have time.
-      }
-
-      const previewBtn = document.getElementById('chime-preview');
-      if (previewBtn) {
-        previewBtn.onclick = () => {
-          const sound = document.getElementById('chime-sound').value;
-          this.audio.playRing(sound, 1.5);
-        };
-      }
-    }, 100);
+    container.appendChild(h('button', { class: 'row row-add', type: 'button', onclick: function () { openEditor(app, null); } },
+      h('span', { class: 'plus' }), h('span', { class: 'row-main', text: 'Add Chime' })));
   }
 
-  calculatePickerTime() {
-    // Since my current Picker is 1-wheel, I'll just return seconds * 1000
-    return this.currentPicker.getValue() * 1000;
+  /* ---------------- editor sheet ---------------- */
+  function openEditor(app, existing) {
+    var d = app.draft, isNew = !existing, A = CT.Audio;
+    var c = existing ? E.cleanChime(existing) : {
+      id: E.newId(),
+      mode: 'fromStart',
+      // new chime defaults to the middle of the timer (2:00 -> 1:00), like the example
+      time: d.totalMs > 0 ? Math.max(1000, Math.round(d.totalMs / 2000) * 1000) : 60000,
+      ringSeconds: app.settings.defaultRing,
+      sound: d.endSound
+    };
+
+    var hint = h('p', { class: 'hint' });
+    function updateHint() {
+      var total = d.totalMs, at = E.chimeAt(c, total), bad = true, text;
+      if (total <= 0) text = 'Set the timer duration first. Until then this chime is skipped.';
+      else if (!E.isValidChime(c, total)) text = 'Outside the timer (total ' + fmt(total) + '). This chime will be skipped.';
+      else { bad = false; text = 'Rings at ' + fmt(at) + ' elapsed, ' + fmt(total - at) + ' left.'; }
+      hint.textContent = text;
+      hint.className = 'hint' + (bad ? ' bad' : '');
+    }
+
+    var wheels = U.TimeWheels({ onChange: function (ms) { c.time = ms; updateHint(); } });
+    wheels.set(c.time);
+    var seg = U.Segmented([{ value: 'fromStart', label: 'From start' }, { value: 'beforeEnd', label: 'Before end' }],
+      c.mode, function (v) { c.mode = v; updateHint(); });
+    var ring = U.Stepper({ min: 1, max: 60, value: c.ringSeconds, format: function (v) { return v + ' s'; },
+      onChange: function (v) { c.ringSeconds = v; } });
+    var sound = U.SoundSelect(c.sound, 'Sound', function (v) { c.sound = v; });
+    var preview = U.PlayButton('Preview sound', function () { A.unlock(); A.ring(sound.get(), 2); });
+    updateHint();
+
+    var content = h('div', null,
+      wheels.el, seg.el,
+      h('div', { class: 'group' }, h('div', { class: 'card' },
+        formRow('Ring for', ring.el), formRow('Sound', sound.el, preview))),
+      hint,
+      isNew ? null : h('div', { class: 'group' }, h('button', {
+        class: 'danger-btn', type: 'button', text: 'Delete Chime',
+        onclick: function () {
+          A.stop(true);
+          Sheet.hide();
+          d.chimes = d.chimes.filter(function (x) { return x.id !== c.id; });
+          app.draftChanged();
+        }
+      })));
+
+    Sheet.open({
+      title: isNew ? 'Add Chime' : 'Edit Chime',
+      content: content,
+      onOpen: function () { wheels.sync(); requestAnimationFrame(wheels.sync); },
+      onDone: function () {
+        A.stop(true);
+        if (isNew) d.chimes.push(c);
+        else d.chimes = d.chimes.map(function (x) { return x.id === c.id ? c : x; });
+        app.draftChanged();
+      },
+      onCancel: function () { A.stop(true); }
+    });
   }
-}
+
+  CT.Chimes = { render: render, openEditor: openEditor };
+})();

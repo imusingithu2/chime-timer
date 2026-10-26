@@ -1,45 +1,72 @@
-/* running.css */
+/* running.css - the running / paused / ended screen */
 .running-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 10;
-  display: none;
+  position: absolute; inset: 0; z-index: 20; background: var(--bg);
+  overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
 }
-
-.progress-container {
-  position: relative;
-  width: 300px;
-  height: 300px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.run-inner {
+  display: flex; flex-direction: column; align-items: center;
+  padding: calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 36px);
+  min-height: 100%;
 }
+.run-title { min-height: 26px; font-size: 20px; font-weight: 600; text-align: center; margin-bottom: 8px; }
+.run-title.ended { font-size: 30px; color: var(--orange); }
 
-.timer-display {
-  font-size: 80px;
-  font-weight: 200;
+.ring-wrap { position: relative; width: 300px; height: 300px; flex: none; }
+.ring-svg { width: 300px; height: 300px; display: block; }
+.ring-track { fill: none; stroke: var(--track); stroke-width: 8; }
+.ring-progress {
+  fill: none; stroke: var(--orange); stroke-width: 8; stroke-linecap: round;
+}
+.running-screen.paused .ring-progress { stroke: var(--text2); }
+.ring-tick { stroke: var(--text); stroke-width: 3; stroke-linecap: round; }
+.ring-tick.rang { opacity: 0.3; }
+.ring-tick.missed { stroke: var(--red); }
+
+.ring-center {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; padding: 0 28px;
+}
+.run-time {
+  font-size: 80px; font-weight: 200; letter-spacing: -1px; line-height: 1;
   font-variant-numeric: tabular-nums;
-  color: var(--text-color);
 }
+.run-time.long { font-size: 62px; }
+.run-end {
+  display: flex; align-items: center; gap: 6px; margin-top: 12px; color: var(--text2); font-size: 17px;
+  max-width: 100%;
+}
+.run-end svg { width: 16px; height: 16px; fill: currentColor; flex: none; }
+.run-end span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.end-time-line {
-  margin-top: 20px;
-  display: flex;
-  align-items: center;
-  color: var(--secondary-text);
-  font-size: 17px;
-}
+.run-buttons { width: 100%; margin-top: 18px; }
+.running-screen.ended .run-buttons { justify-content: center; }
+.running-screen.ended #run-cancel { display: none; }
+.running-screen.ended #run-pause { width: 120px; height: 120px; font-size: 22px; }
 
-.bell-icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 8px;
-  fill: currentColor;
+.run-next { margin-top: 14px; font-size: 17px; color: var(--text2); text-align: center; }
+.run-next b { color: var(--orange); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.run-chimes { width: 100%; margin-top: 18px; }
+.run-chimes .row { min-height: 44px; }
+.run-chimes .st { color: var(--text2); font-size: 15px; font-variant-numeric: tabular-nums; }
+.run-chimes .st.next { color: var(--orange); }
+.run-chimes .st.missed { color: var(--red); font-weight: 600; }
+.run-chimes .st.rang { color: var(--green); }
+.run-chimes .st.bad { color: var(--red); }
+
+.run-note {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  margin-top: 18px; font-size: 13px; color: var(--text2); text-align: center; max-width: 330px;
 }
+.run-note svg { width: 13px; height: 13px; fill: currentColor; flex: none; }
+
+.chime-banner {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 120;
+  top: calc(env(safe-area-inset-top) + 10px);
+  display: flex; align-items: center; gap: 12px;
+  padding: 6px 8px 6px 18px; border-radius: 999px;
+  background: var(--card); color: var(--text); font-size: 17px; font-weight: 600; white-space: nowrap;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); border: 1px solid var(--sep);
+  animation: drop 0.25s ease-out;
+}
+@keyframes drop { from { transform: translate(-50%, -30px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }

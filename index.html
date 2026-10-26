@@ -8,7 +8,11 @@
   <meta name="apple-mobile-web-app-title" content="Chime Timer">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#000000">
+  <meta name="description" content="A timer with extra rings at custom times.">
   <title>Chime Timer</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="./icons/icon-192.png">
   <link rel="stylesheet" href="./styles/base.css">
   <link rel="stylesheet" href="./styles/picker.css">
   <link rel="stylesheet" href="./styles/components.css">
@@ -16,98 +20,121 @@
 </head>
 <body>
   <div id="app">
-    <!-- Main Screen -->
-    <div id="main-screen" class="screen">
-      <div class="list-group">
-        <div class="group-section">
-          <div class="picker-container">
-            <div class="picker-mask"></div>
-            <div id="duration-picker" class="picker-wheel"></div>
-            <div class="picker-band"></div>
-            <div id="picker-units" class="picker-unit"></div>
-          </div>
-        </div>
 
-        <div class="button-row">
-          <button id="btn-cancel" class="circle-btn cancel">Cancel</button>
-          <button id="btn-start" class="circle-btn start">Start</button>
-        </div>
+    <!-- ===== Main screen ===== -->
+    <main id="main-screen" class="screen">
+      <div id="wheels"></div>
 
-        <div class="group-section">
-          <div class="card">
-            <div id="row-label" class="row">
-              <span class="row-label">Label</span>
-              <span class="row-value">None</span>
-              <span class="chevron"></span>
-            </div>
-            <div id="row-end-settings" class="row">
-              <span class="row-label">When Timer Ends</span>
-              <span class="row-value">Bell, 3s</span>
-              <span class="chevron"></span>
-            </div>
-          </div>
-        </div>
-
-        <div class="group-section">
-          <div class="group-header">Chimes</div>
-          <div id="chimes-list" class="card">
-            <!-- Chime rows here -->
-          </div>
-          <div id="btn-add-chime" class="row" style="color: var(--start-green); margin-top: 8px;">
-            <span>+ Add Chime</span>
-          </div>
-        </div>
-
-        <div class="group-section">
-          <div class="group-header">Recents</div>
-          <div id="recents-list" class="card">
-            <!-- Recents rows here -->
-          </div>
-        </div>
-
-        <div class="group-section">
-          <div id="row-settings" class="row card">
-            <span class="row-label">Settings</span>
-            <span class="chevron"></span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Running Screen -->
-    <div id="running-screen" class="running-screen">
-      <div class="progress-container">
-        <svg width="300" height="300">
-          <circle cx="150" cy="150" r="140" stroke="var(--separator-color)" stroke-width="8" fill="none" />
-          <circle id="progress-ring" cx="150" cy="150" r="140" stroke="var(--pause-orange)" stroke-width="8" fill="none"
-                  stroke-dasharray="879.6" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 150 150)" />
-        </svg>
-        <div id="timer-display" class="timer-display">00:00:00</div>
-      </div>
-      <div class="end-time-line">
-        <svg class="bell-icon" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-        <span id="end-time-text">3:42 PM</span>
-      </div>
       <div class="button-row">
-        <button id="run-btn-cancel" class="circle-btn cancel">Cancel</button>
-        <button id="run-btn-pause" class="circle-btn pause">Pause</button>
+        <button id="btn-cancel" class="circle-btn cancel" type="button" disabled>Cancel</button>
+        <button id="btn-start" class="circle-btn start" type="button" disabled>Start</button>
       </div>
-      <div id="next-chime-text" style="color: var(--secondary-text); margin-top: 20px;">No more chimes</div>
+
+      <div class="group">
+        <div class="card">
+          <button id="row-label" class="row" type="button">
+            <span class="row-main">Label</span>
+            <span id="val-label" class="row-value">None</span><span class="chevron"></span>
+          </button>
+          <button id="row-end" class="row" type="button">
+            <span class="row-main">When Timer Ends</span>
+            <span id="val-end" class="row-value">Bell, 3 s</span><span class="chevron"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-head">
+          <span class="group-title">Chimes</span>
+          <button id="btn-edit-chimes" class="link-btn" type="button" hidden>Edit</button>
+        </div>
+        <div id="chimes-list" class="card"></div>
+      </div>
+
+      <div class="group">
+        <div class="group-head">
+          <span class="group-title">Recents</span>
+          <button id="btn-edit-recents" class="link-btn" type="button" hidden>Edit</button>
+        </div>
+        <div id="recents-list" class="card"></div>
+      </div>
+
+      <div class="group">
+        <div class="card">
+          <button id="row-settings" class="row" type="button">
+            <span class="row-main">Settings</span><span class="chevron"></span>
+          </button>
+        </div>
+      </div>
+      <p id="footnote" class="footnote"></p>
+    </main>
+
+    <!-- ===== Running / paused / ended screen ===== -->
+    <section id="running-screen" class="running-screen" hidden>
+      <div class="run-inner">
+        <div id="run-title" class="run-title"></div>
+
+        <div class="ring-wrap">
+          <svg class="ring-svg" viewBox="0 0 300 300" aria-hidden="true">
+            <circle class="ring-track" cx="150" cy="150" r="140"></circle>
+            <circle id="ring-progress" class="ring-progress" cx="150" cy="150" r="140"></circle>
+            <g id="ring-ticks"></g>
+          </svg>
+          <div class="ring-center">
+            <div id="run-time" class="run-time" role="timer" aria-live="off">0:00</div>
+            <div class="run-end">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a2.4 2.4 0 0 0 2.4-2.4H9.6A2.4 2.4 0 0 0 12 22zm6.5-6.6v-5c0-3.1-1.6-5.6-4.5-6.3V3.4a2 2 0 0 0-4 0v.7C7.1 4.8 5.5 7.400 5.500 10.400v5L3.500 17.400v1.200h17v-1.200z"/></svg>
+              <span id="run-end-text"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="button-row run-buttons">
+          <button id="run-cancel" class="circle-btn cancel" type="button">Cancel</button>
+          <button id="run-pause" class="circle-btn pause" type="button">Pause</button>
+        </div>
+
+        <div id="run-next" class="run-next"></div>
+        <div id="run-chimes" class="card run-chimes" hidden></div>
+
+        <div class="run-note">
+          <svg id="lock-icon" viewBox="0 0 24 24" hidden aria-label="Screen is being kept on"><path d="M17 9V7a5 5 0 0 0-10 0v2H5v12h14V9zm-8-2a3 3 0 0 1 6 0v2H9z"/></svg>
+          <span>Keep this app open and the screen on for chimes to ring.</span>
+        </div>
+        <div id="wake-tip" class="run-note" hidden>Tip: set Settings &gt; Display &amp; Brightness &gt; Auto-Lock to Never while using the timer.</div>
+      </div>
+    </section>
+
+    <div id="chime-banner" class="chime-banner" hidden>
+      <span id="chime-banner-text"></span>
+      <button id="chime-banner-stop" class="pill-btn" type="button">Stop</button>
     </div>
 
-    <!-- Sheet -->
+    <!-- ===== Bottom sheet (label, end sound, chime editor, settings) ===== -->
     <div id="sheet-backdrop" class="sheet-backdrop"></div>
-    <div id="sheet" class="sheet">
+    <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
       <div class="sheet-grabber"></div>
       <div class="sheet-header">
-        <button id="sheet-btn-cancel" class="sheet-btn">Cancel</button>
-        <div id="sheet-title" class="sheet-header-title">Title</div>
-        <button id="sheet-btn-done" class="sheet-btn">Done</button>
+        <button id="sheet-cancel" class="sheet-btn cancel" type="button">Cancel</button>
+        <div id="sheet-title" class="sheet-title"></div>
+        <button id="sheet-done" class="sheet-btn done" type="button">Done</button>
       </div>
       <div id="sheet-content" class="sheet-content"></div>
     </div>
+
+    <div id="banner" class="banner" role="status" hidden></div>
+    <div id="error-banner" role="alert" hidden></div>
   </div>
 
-  <script src="./js/app.js"></script>
+  <noscript><p style="padding:24px;color:#fff">Chime Timer needs JavaScript.</p></noscript>
+
+  <!-- Classic scripts (no ES modules). Order matters. -->
+  <script src="./js/version.js"></script>
+  <script src="./js/engine.js"></script>
+  <script src="./js/platform.js"></script>
+  <script src="./js/ui-widgets.js"></script>
+  <script src="./js/ui-chimes.js"></script>
+  <script src="./js/ui-running.js"></script>
+  <script src="./js/ui-main.js"></script>
 </body>
 </html>
